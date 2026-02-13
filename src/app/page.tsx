@@ -493,9 +493,17 @@ function ResultView({
     setSettings((s) => ({ ...s, [key]: value }));
 
   return (
-    <div className="w-full max-w-[1100px] flex flex-col lg:flex-row gap-4 sm:gap-6 items-start animate-in">
-      {/* Preview — shown first on mobile */}
-      <div className="w-full lg:flex-1 lg:min-w-0 flex flex-col gap-2 order-1 lg:order-2">
+    <div className="w-full max-w-[1100px] grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4 sm:gap-6 items-start animate-in">
+      {/* Original thumbnail */}
+      <div className="flex flex-col gap-2 order-1 lg:col-start-1 lg:row-start-1">
+        <p className="font-body font-medium text-[14px] text-secondary">Original</p>
+        <div className="rounded-[20px] border border-border overflow-hidden bg-border/30 aspect-video flex items-center justify-center">
+          <img src={original} alt="Original" className="max-w-full max-h-full object-contain" />
+        </div>
+      </div>
+
+      {/* Sticker preview — between original & customize on mobile, right column on desktop */}
+      <div className="flex flex-col gap-2 order-2 lg:col-start-2 lg:row-start-1 lg:row-span-3">
         <p className="font-body font-medium text-[14px] text-secondary">
           Sticker preview
           {regenerating && <span className="ml-2 text-[12px] text-secondary/60">updating...</span>}
@@ -516,77 +524,66 @@ function ResultView({
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="w-full lg:w-[320px] lg:shrink-0 flex flex-col gap-4 lg:sticky lg:top-8 order-2 lg:order-1">
-        {/* Original thumbnail */}
-        <div className="flex flex-col gap-2">
-          <p className="font-body font-medium text-[14px] text-secondary">Original</p>
-          <div className="rounded-[20px] border border-border overflow-hidden bg-border/30 aspect-video flex items-center justify-center">
-            <img src={original} alt="Original" className="max-w-full max-h-full object-contain" />
-          </div>
-        </div>
+      {/* Customize panel */}
+      <div className="rounded-[20px] border border-border bg-surface p-4 sm:p-5 flex flex-col gap-5 order-3 lg:col-start-1 lg:row-start-2 lg:sticky lg:top-8">
+        <p className="font-sans font-semibold text-[16px] text-primary">Customize</p>
 
-        {/* Customize panel */}
-        <div className="rounded-[20px] border border-border bg-surface p-4 sm:p-5 flex flex-col gap-5">
-          <p className="font-sans font-semibold text-[16px] text-primary">Customize</p>
+        <SliderControl
+          label="Outline thickness" value={settings.outlineWidth}
+          min={0} max={20} step={1} unit="px"
+          onChange={(v) => set("outlineWidth", v)}
+        />
 
-          <SliderControl
-            label="Outline thickness" value={settings.outlineWidth}
-            min={0} max={20} step={1} unit="px"
-            onChange={(v) => set("outlineWidth", v)}
-          />
+        <ColorPicker value={settings.outlineColor} onChange={(c) => set("outlineColor", c)} />
 
-          <ColorPicker value={settings.outlineColor} onChange={(c) => set("outlineColor", c)} />
+        <PillPicker
+          label="Outline style"
+          options={OUTLINE_STYLES}
+          value={settings.outlineStyle}
+          onChange={(v) => {
+            set("outlineStyle", v);
+            if (v !== "solid") {
+              const d = WAVE_DEFAULTS[v];
+              set("wave1", d.wave1);
+              set("wave2", d.wave2);
+              set("wave3", d.wave3);
+              set("masterAmp", d.masterAmp);
+            }
+          }}
+        />
 
-          <PillPicker
-            label="Outline style"
-            options={OUTLINE_STYLES}
-            value={settings.outlineStyle}
-            onChange={(v) => {
-              set("outlineStyle", v);
-              if (v !== "solid") {
-                const d = WAVE_DEFAULTS[v];
-                set("wave1", d.wave1);
-                set("wave2", d.wave2);
-                set("wave3", d.wave3);
-                set("masterAmp", d.masterAmp);
-              }
-            }}
-          />
+        {settings.outlineStyle !== "solid" && (
+          <FineTuneControls settings={settings} set={set} />
+        )}
 
-          {settings.outlineStyle !== "solid" && (
-            <FineTuneControls settings={settings} set={set} />
-          )}
+        <PillPicker
+          label="Shadow"
+          options={SHADOW_STYLES}
+          value={settings.shadowStyle}
+          onChange={(v) => set("shadowStyle", v)}
+        />
+      </div>
 
-          <PillPicker
-            label="Shadow"
-            options={SHADOW_STYLES}
-            value={settings.shadowStyle}
-            onChange={(v) => set("shadowStyle", v)}
-          />
-        </div>
-
-        {/* Actions */}
-        <div className="flex gap-2">
-          <button
-            onClick={handleDownload}
-            disabled={!stickerUrl}
-            className="flex-1 flex items-center justify-center gap-2 h-[44px] sm:h-[40px] px-5 rounded-[12px] bg-primary text-background font-body font-medium text-[15px] cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            Download PNG
-          </button>
-          <button
-            onClick={onReset}
-            className="flex items-center justify-center h-[44px] sm:h-[40px] px-5 rounded-[12px] bg-border text-secondary font-body font-medium text-[15px] cursor-pointer hover:bg-border/70 transition-colors"
-          >
-            Start over
-          </button>
-        </div>
+      {/* Actions */}
+      <div className="flex gap-2 order-4 lg:col-start-1 lg:row-start-3">
+        <button
+          onClick={handleDownload}
+          disabled={!stickerUrl}
+          className="flex-1 flex items-center justify-center gap-2 h-[44px] sm:h-[40px] px-5 rounded-[12px] bg-primary text-background font-body font-medium text-[15px] cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Download PNG
+        </button>
+        <button
+          onClick={onReset}
+          className="flex items-center justify-center h-[44px] sm:h-[40px] px-5 rounded-[12px] bg-border text-secondary font-body font-medium text-[15px] cursor-pointer hover:bg-border/70 transition-colors"
+        >
+          Start over
+        </button>
       </div>
     </div>
   );
