@@ -633,39 +633,41 @@ function ResultView({
       </div>
 
       {/* Actions */}
-      <div className="flex gap-2 order-4 lg:col-start-1 lg:row-start-3">
-        <button
-          onClick={handleDownload}
-          disabled={!stickerUrl}
-          className="flex-1 flex items-center justify-center gap-2 h-[44px] sm:h-[40px] px-5 rounded-[12px] bg-primary text-background font-body font-medium text-[15px] cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-          Download
-        </button>
-        <button
-          onClick={handleCopy}
-          disabled={!stickerUrl}
-          className="flex items-center justify-center gap-2 h-[44px] sm:h-[40px] px-5 rounded-[12px] bg-border text-secondary font-body font-medium text-[15px] cursor-pointer hover:bg-border/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {copied ? (
+      <div className="flex flex-col gap-2 order-4 lg:col-start-1 lg:row-start-3">
+        <div className="flex gap-2">
+          <button
+            onClick={handleDownload}
+            disabled={!stickerUrl}
+            className="flex-1 flex items-center justify-center gap-2 h-[44px] sm:h-[40px] px-5 rounded-[12px] bg-primary text-background font-body font-medium text-[15px] cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12" />
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
-          ) : (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-            </svg>
-          )}
-          {copied ? "Copied!" : "Copy"}
-        </button>
+            Download
+          </button>
+          <button
+            onClick={handleCopy}
+            disabled={!stickerUrl}
+            className="flex-1 flex items-center justify-center gap-2 h-[44px] sm:h-[40px] px-5 rounded-[12px] bg-border text-secondary font-body font-medium text-[15px] cursor-pointer hover:bg-border/70 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {copied ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+            )}
+            {copied ? "Copied!" : "Copy"}
+          </button>
+        </div>
         <button
           onClick={onReset}
-          className="flex items-center justify-center h-[44px] sm:h-[40px] px-5 rounded-[12px] bg-border text-secondary font-body font-medium text-[15px] cursor-pointer hover:bg-border/70 transition-colors"
+          className="w-full flex items-center justify-center h-[44px] sm:h-[40px] px-5 rounded-[12px] bg-border text-secondary font-body font-medium text-[15px] cursor-pointer hover:bg-border/70 transition-colors"
         >
           Start over
         </button>
