@@ -450,6 +450,14 @@ function ColorPicker({
   );
 }
 
+const PREVIEW_BGS: { value: string | null; label: string }[] = [
+  { value: null, label: "Transparent" },
+  { value: "#ffffff", label: "White" },
+  { value: "#000000", label: "Black" },
+  { value: "#3b82f6", label: "Blue" },
+  { value: "#ec4899", label: "Pink" },
+];
+
 /* ─── Result View ─── */
 
 function ResultView({
@@ -461,6 +469,9 @@ function ResultView({
   const [stickerUrl, setStickerUrl] = useState<string | null>(null);
   const [regenerating, setRegenerating] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null);
+  const [previewBg, setPreviewBg] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -492,6 +503,22 @@ function ResultView({
   const set = <K extends keyof StickerSettings>(key: K, value: StickerSettings[K]) =>
     setSettings((s) => ({ ...s, [key]: value }));
 
+  const onPointerDown = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    dragRef.current = { startX: e.clientX, startY: e.clientY, origX: pos.x, origY: pos.y };
+  }, [pos]);
+
+  const onPointerMove = useCallback((e: React.PointerEvent) => {
+    if (!dragRef.current) return;
+    setPos({
+      x: dragRef.current.origX + (e.clientX - dragRef.current.startX),
+      y: dragRef.current.origY + (e.clientY - dragRef.current.startY),
+    });
+  }, []);
+
+  const onPointerUp = useCallback(() => { dragRef.current = null; }, []);
+
   return (
     <div className="w-full max-w-[1100px] grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4 sm:gap-6 items-start animate-in">
       {/* Original thumbnail */}
@@ -508,12 +535,39 @@ function ResultView({
           Sticker preview
           {regenerating && <span className="ml-2 text-[12px] text-secondary/60">updating...</span>}
         </p>
-        <div className="rounded-[20px] border border-border overflow-hidden checkered flex items-center justify-center p-6 sm:p-8 min-h-[300px] sm:min-h-[500px]">
+        <div
+          className={`rounded-[20px] border border-border overflow-hidden flex items-center justify-center p-6 sm:p-8 min-h-[300px] sm:min-h-[500px] relative ${!previewBg ? "checkered" : ""}`}
+          style={previewBg ? { backgroundColor: previewBg } : undefined}
+        >
+          {/* Preview background colors */}
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5">
+            {PREVIEW_BGS.map((bg) => (
+              <button
+                key={bg.value ?? "none"}
+                onClick={() => setPreviewBg(bg.value)}
+                title={bg.label}
+                className={`w-6 h-6 rounded-full cursor-pointer transition-all duration-150 ${
+                  previewBg === bg.value
+                    ? "ring-2 ring-primary ring-offset-1 scale-110"
+                    : "ring-1 ring-border/50 hover:ring-secondary/40 opacity-60 hover:opacity-100"
+                }`}
+                style={bg.value ? { backgroundColor: bg.value } : undefined}
+              >
+                {bg.value === null && (
+                  <span className="block w-full h-full rounded-full checkered" />
+                )}
+              </button>
+            ))}
+          </div>
           {stickerUrl ? (
             <img
               src={stickerUrl}
               alt="Sticker"
-              className={`max-w-full max-h-[400px] sm:max-h-[600px] object-contain transition-all duration-200 ${regenerating ? "opacity-40" : "opacity-100"}`}
+              onPointerDown={onPointerDown}
+              onPointerMove={onPointerMove}
+              onPointerUp={onPointerUp}
+              style={{ transform: `translate(${pos.x}px, ${pos.y}px)` }}
+              className={`max-w-full max-h-[400px] sm:max-h-[600px] object-contain cursor-grab active:cursor-grabbing select-none touch-none ${regenerating ? "opacity-40" : "opacity-100"}`}
             />
           ) : (
             <svg className="animate-spin w-8 h-8 text-secondary/40" viewBox="0 0 40 40">
