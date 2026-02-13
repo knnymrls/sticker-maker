@@ -239,7 +239,7 @@ export default function Home() {
             Made by
           </span>
           <a
-            href="https://x.com/kenemrls"
+            href="https://kenemrls.com"
             target="_blank"
             rel="noopener noreferrer"
             className="group inline-flex items-center"
